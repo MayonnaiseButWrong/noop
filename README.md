@@ -187,11 +187,3 @@ SpO₂, respiratory rate, and skin temperature are **approximations** computed f
 published methods. They are not clinically validated and are not medical advice. Do
 not use them to diagnose, treat, or make health decisions — consult a qualified
 professional.
-
----
-
-## License
-
-MIT License. See [LICENSE](LICENSE).
-
----
