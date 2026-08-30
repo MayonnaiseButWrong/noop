@@ -1,0 +1,89 @@
+# project.yml — XcodeGen spec for a minimal iOS app target.
+#
+# WHY THIS EXISTS: the repo has real Swift packages (StrandAnalytics,
+# StrandDesign, WhoopProtocol, WhoopStore, WhoopKitExperimental) but no
+# actual buildable app -- no .xcodeproj, no Strand/ folder, nothing
+# xcodebuild can point at. This defines the smallest possible app target
+# that links all five packages, so there's something to build/sign/run on
+# a real iPhone today. It is NOT a rebuild of whatever the original
+# Strand app looked like -- that's still an open question (see the
+# provenance/mirror discussion from earlier) -- just an honest minimal
+# starting point.
+#
+# Generate the actual .xcodeproj from this on the Mac with:
+#   brew install xcodegen
+#   xcodegen generate
+#
+# Edit THIS FILE (from Windows) to add targets/settings; don't hand-edit
+# the generated .xcodeproj, since xcodegen overwrites it on every run --
+# that's the whole point of using it for a Windows/Mac split workflow.
+
+name: Strand
+options:
+  bundleIdPrefix: com.yourname.strand   # CHANGE to something you control
+  deploymentTarget:
+    iOS: "16.0"
+
+packages:
+  WhoopProtocol:
+    path: Packages/WhoopProtocol
+  WhoopStore:
+    path: Packages/WhoopStore
+  StrandAnalytics:
+    path: Packages/StrandAnalytics
+  StrandDesign:
+    path: Packages/StrandDesign
+  WhoopKitExperimental:
+    path: Packages/WhoopKitExperimental
+
+targets:
+  Strand:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - StrandApp
+    info:
+      path: StrandApp/Info.plist
+      properties:
+        UILaunchScreen: {}
+        # Required for CoreBluetooth to work at all on iOS -- without this
+        # key the app crashes the instant it touches CBCentralManager.
+        NSBluetoothAlwaysUsageDescription: "Strand connects to your WHOOP strap over Bluetooth to read your data."
+        NSBluetoothPeripheralUsageDescription: "Strand connects to your WHOOP strap over Bluetooth to read your data."
+    dependencies:
+      - package: WhoopProtocol
+        product: WhoopProtocol
+      - package: WhoopStore
+        product: WhoopStore
+      - package: StrandAnalytics
+        product: StrandAnalytics
+      - package: StrandDesign
+        product: StrandDesign
+        # If StrandDesign's actual Package.swift declares a different
+        # product name than "StrandDesign", xcodegen/xcodebuild will say
+        # so clearly ("product ... not found") -- fix this line to match,
+        # don't guess further blind.
+      - package: WhoopKitExperimental
+        product: WhoopKit
+        # NOTE: the *folder*/SPM package name is WhoopKitExperimental, but
+        # its Package.swift declares the library product as "WhoopKit" --
+        # that's what `import WhoopKit` in ContentView.swift refers to.
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.yourname.strand.app
+        CODE_SIGN_STYLE: Automatic
+        # DEVELOPMENT_TEAM intentionally left blank here -- set it once in
+        # Xcode's Signing & Capabilities on the Mac (needs your actual
+        # Apple Developer Team ID, which isn't something to hardcode into
+        # a public repo file anyway).
+
+schemes:
+  Strand:
+    build:
+      targets:
+        Strand: all
+    run:
+      config: Debug
+    archive:
+      config: Release
