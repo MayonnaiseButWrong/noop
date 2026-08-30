@@ -1,13 +1,6 @@
-import SwiftUI
+﻿import SwiftUI
 import CoreBluetooth
-import WhoopKit   // product name from WhoopKitExperimental's Package.swift
-
-// Deliberately minimal: this exists to prove the whole pipeline (Windows
-// edit -> git push -> Mac build/sign -> TestFlight -> iPhone) works
-// end-to-end with something real -- live heart rate off your actual
-// strap -- before building any actual UI for recovery/strain/sleep.
-// WhoopBLEManagerDelegate is the protocol WhoopKitExperimental/BLEManager.swift
-// already defines; nothing new is invented here, just wired up.
+import WhoopKit
 
 final class ContentViewModel: NSObject, ObservableObject, WhoopBLEManagerDelegate {
     @Published var state: String = "idle"
@@ -26,8 +19,6 @@ final class ContentViewModel: NSObject, ObservableObject, WhoopBLEManagerDelegat
         manager.startScan()
     }
 
-    // MARK: - WhoopBLEManagerDelegate
-
     func whoopManager(_ manager: WhoopBLEManager, didUpdateState newState: WhoopBLEManager.ConnectionState) {
         DispatchQueue.main.async { self.state = String(describing: newState) }
     }
@@ -37,8 +28,6 @@ final class ContentViewModel: NSObject, ObservableObject, WhoopBLEManagerDelegat
     }
 
     func whoopManager(_ manager: WhoopBLEManager, didDecode message: DecodedPuffin, fromChannel uuid: CBUUID) {
-        // Real decoded WHOOP5 records will show up here as messages.swift
-        // grows to cover more record types. Nothing to show yet.
     }
 
     func whoopManager(_ manager: WhoopBLEManager, didFailWithError error: Error) {
